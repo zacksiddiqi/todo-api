@@ -3,4 +3,4 @@ node_modules/
 # Env Variable
 .env
 #Editior files
-./vscode
+.vscode
