@@ -41,26 +41,26 @@ router.post('/', async(req, res) => {
 });
 
 // PUT /todos/:id - update a todo
-router.put('/', async(req, res) => {
-    const [title, completed] = req.body;
+router.put('/:id', async(req, res) => {
+    const {title, completed} = req.body;
     try{
         const [check] = await pool.query('SELECT * FROM todos WHERE id = ?', [req.params.id]);
-        if (rows.length === 0) return res.status(404).json({error: 'Not Found'});
-        await pool.query('UPDATE todos SET title = COALESCE(?, title), completed = COALESCE(completed, ?)',
+        if (check.length === 0) return res.status(404).json({error: 'Not Found'});
+        await pool.query('UPDATE todos SET title = COALESCE(?, title), completed = COALESCE(?, completed) WHERE id = ?',
             [title ?? null, completed ?? null, req.params.id]
         );
         const [rows] = await pool.query('SELECT * FROM todos WHERE id = ?', [req.params.id]);
-        res.json(rows);
+        res.json(rows[0]);
     } catch(err){
         res.status(500).json({error: err.message});
     }
 });
 
 // DELETE /todos/:id - delete a todo
-router.delete('/', async(req, res) => {
+router.delete('/:id', async(req, res) => {
     try{
         const [check] = await pool.query('SELECT * FROM todos WHERE id = ?', [req.params.id]);
-        if (rows.length === 0) return res.status(404).json({error: 'Not Found'});
+        if (check.length === 0) return res.status(404).json({error: 'Not Found'});
         await pool.query('DELETE FROM todos WHERE id = ?', [req.params.id]);
         res.json({message: 'Todo deleted successfully', id: parseInt(req.params.id)});
     } catch(err){
